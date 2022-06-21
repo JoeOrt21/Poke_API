@@ -1,6 +1,8 @@
 import React,{ useState, useEffect } from "react";
 import { getAllPokemon, getPokemon} from "./pokemon";
-
+import Card from "./Card";
+import Navbar from "./Navbar";
+import './App.css';
 
 function App() {
 
@@ -22,6 +24,25 @@ function App() {
     fetchData();
   },[]);
 
+  const next = async () => {
+    setLoading(true);
+    let data=await getAllPokemon(nextUrl)
+    await loadingPokemon(data.results)
+    setNextUrl(data.next);
+    setPrevUrl(data.previous);
+    setLoading(false);
+  }
+
+  const prev = async () => {
+    if (!prevUrl)return;
+    setLoading(true);
+    let data=await getAllPokemon(prevUrl)
+    await loadingPokemon(data.results)
+    setNextUrl(data.next);
+    setPrevUrl(data.previous);
+    setLoading(false);
+  }
+
   const loadingPokemon = async (data) => { //Funcion de carga
     let _pokemon = await Promise.all(data.map(async pokemon => {
       let pokemonRecord = await getPokemon(pokemon.url);
@@ -32,9 +53,29 @@ function App() {
 
 
   return (
-    <div className="App">
-      {loading ? <h1>Cargando...</h1> : 
-        <h1>Obteniendo datos</h1>
+    <div>
+      {
+        loading ? <h1>Cargando...</h1> : (
+          <>
+          <Navbar/>
+          <div className='btn'>
+          <button onClick={prev}>Anterior</button>
+          <button onClick={next}>Siguiente</button>
+          </div>
+
+          <div className="grid-container">
+            
+            {pokemonData.map((pokemon, i) => {
+              return <Card key={i} pokemon={pokemon}/>
+            })}
+            </div>
+
+            <div className='btn'>
+            <button onClick={prev}>Anterior</button>
+            <button onClick={next}>Siguiente</button>
+            </div>
+          </>
+        )
       }
     </div>
   );
